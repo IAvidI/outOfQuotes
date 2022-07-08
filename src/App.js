@@ -1,12 +1,17 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function App() {
-  const [bookTitle, setBookTitle] = useState("");
+  const [bookTitles, setBookTitles] = useState([]);
   const [bookURL, setBookURL] = useState("");
   const [bookText, setBookText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [err, setErr] = useState("");
+
+  var openLib = "https://openlibrary.org";
+
+  // var bookTitles = [];
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -18,7 +23,7 @@ function App() {
 
     var num = randomNumberInRange(1, 100);
 
-    console.log(num);
+    // console.log(num);
 
     var api1 =
       "https://openlibrary.org/search.json?q=subject%3AAccessible+book&mode=ebooks&sort=random_";
@@ -28,7 +33,7 @@ function App() {
 
     var api = api1 + num.toString() + api2;
 
-    console.log(api);
+    // console.log(api);
 
     try {
       const response = await fetch(api, {
@@ -44,13 +49,48 @@ function App() {
 
       const result = await response.json();
 
-      console.log("result is: ", JSON.stringify(result.docs[0], null, 4));
-      console.log();
-      setBookTitle(result.docs[0].title);
+      // console.log("result is: ", JSON.stringify(result.docs[0], null, 4));
+      // console.log();
+      setBookTitles((oldArray) => [...oldArray, result.docs[0].title]);
+      setBookTitles((oldArray) => [...oldArray, result.docs[1].title]);
+      setBookTitles((oldArray) => [...oldArray, result.docs[2].title]);
+      setBookTitles((oldArray) => [...oldArray, result.docs[3].title]);
+      setBookTitles((oldArray) => [...oldArray, result.docs[4].title]);
+
+      // setBookTitles(result.docs[0].title);
+
+      var bURL = result.docs[0].key;
       setBookURL(result.docs[0].key);
     } catch (err) {
       setErr(err.message);
     } finally {
+      var URL = openLib + bURL;
+
+      // console.log(URL);
+
+      var fullText = "";
+
+      axios.get("http://localhost:3001/scraper").then((res) => {
+        console.log("res", res);
+        fullText = res.data;
+      });
+
+      // https://ia802503.us.archive.org/23/items/mymemoirs187819100will/mymemoirs187819100will_djvu.txt
+      // https://archive.org/download/mymemoirs187819100will/mymemoirs187819100will_djvu.txt
+
+      fetch(
+        "https://archive.org/download/mymemoirs187819100will/mymemoirs187819100will_djvu.txt"
+      )
+        .then((res) => {
+          res.text();
+        })
+        .then((data) => {
+          console.log("data", data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
       fetch(
         "https://ia802503.us.archive.org/23/items/mymemoirs187819100will/mymemoirs187819100will_djvu.txt"
       )
@@ -61,7 +101,7 @@ function App() {
           // data = data.replace(/(?:\r\n|\r|\n)/g, "<br/>");
 
           var fields = data.split(". ");
-          console.log(fields.length);
+          // console.log(fields.length);
 
           var paragraph = randomNumberInRange(10, fields.length - 10);
 
@@ -91,6 +131,12 @@ function App() {
     }
   };
 
+  // useEffect(() => {
+  //   axios
+  //     .get("http://localhost:3001/scraper")
+  //     .then((res) => console.log("res", res));
+  // }, []);
+
   // console.log(book.description);
 
   return (
@@ -99,9 +145,15 @@ function App() {
       <button onClick={handleClick}>Fetch data</button>
       {isLoading && <h2>Loading...</h2>}
 
-      <h4>{bookTitle}</h4>
+      <h4>{bookTitles[0]}</h4>
       <h4>{bookURL}</h4>
       <div className="display-linebreak">{bookText}</div>
+      <br />
+      <h2>{bookTitles[0]}</h2>
+      <h2>{bookTitles[1]}</h2>
+      <h2>{bookTitles[2]}</h2>
+      <h2>{bookTitles[3]}</h2>
+      <h2>{bookTitles[4]}</h2>
     </div>
   );
 }
