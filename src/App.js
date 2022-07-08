@@ -51,7 +51,7 @@ function App() {
 
       // console.log("result is: ", JSON.stringify(result.docs[0], null, 4));
       // console.log();
-      setBookTitles((oldArray) => [...oldArray, result.docs[0].title]);
+      setBookTitles([result.docs[0].title]);
       setBookTitles((oldArray) => [...oldArray, result.docs[1].title]);
       setBookTitles((oldArray) => [...oldArray, result.docs[2].title]);
       setBookTitles((oldArray) => [...oldArray, result.docs[3].title]);
